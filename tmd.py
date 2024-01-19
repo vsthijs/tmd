@@ -7,6 +7,7 @@ from rich.syntax import Syntax
 from rich.tree import Tree
 
 console = Console()
+force_code = False
 
 
 def print_markdown(src:str) -> None:
@@ -22,7 +23,7 @@ def index_dir(d: str, t: Tree) -> None:
 
 
 def print_file(f:str) -> None:
-    if f.endswith(".md"):
+    if f.endswith(".md") and not force_code:
         return print_markdown(f)
     else:
         console.print(Syntax.from_path(f, theme="ansi_dark"))
@@ -31,10 +32,15 @@ def print_file(f:str) -> None:
 def print_help() -> None:
     print("""tmd reads files to the terminal like cat, but highlights the syntax.
 
-Usage: tmd [-h|--help] [-v|--version] files""")
+Usage: tmd [-h|--help] [-v|--version] [flags] files
+
+Flags:
+          --force-code          Do not apply special style for markdown files.
+          --disable-markdown    Does the same as --force-code.""")
 
 
 def main(argv:list[str]) -> int:
+    global force_code
     last_file:str = ""
     files = []
     for ii in argv[1:]:
@@ -43,8 +49,10 @@ def main(argv:list[str]) -> int:
                 print_help()
                 return 0
             elif ii in ["-v", "--version"]:
-                print("tmd 0.1.0")
+                print("tmd 0.1.1")
                 return 0
+            elif ii in ["--force-code", "--disable-markdown"]:
+                force_code = True
             else:
                 print(f"tmd: [red]err:[/red] unrecognized option '{ii}'", file=sys.stderr)
                 return 1
